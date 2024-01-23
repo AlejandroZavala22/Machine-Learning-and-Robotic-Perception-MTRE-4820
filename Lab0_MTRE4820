@@ -1,0 +1,108 @@
+### Alejandro Zavala
+"""
+Created on Fri Jan 19 23:15:17 2024
+
+@author: Alejandro Zavala
+"""
+
+import cv2
+import matplotlib.pyplot as plot
+import numpy as np
+
+##This will declare BGR as the variable with the original color image, which is BGR.
+## Since cv2 "reads" colors in the BGR spectrum, we need to change it to the RGB.
+BGR = cv2.imread('folders02.jpg')
+RGB = cv2.cvtColor(BGR, cv2.COLOR_BGR2RGB)
+R = RGB[:,:,0]
+G = RGB[:,:,1]
+B = RGB[:,:,2]
+
+plot.figure(1)
+plot.clf()
+plot.imshow(RGB)
+
+## If I run this code here, it will select the 4 points from the BGR image, which is the one that is altered
+##Therefore, I will comment out this part
+# plot.figure(2)
+# plot.clf()
+# plot.imshow(BGR)
+
+## This is for choosing the 4 points in the picture
+p = np.array(plot.ginput(4))
+
+
+#This to best understand the formula of y = mx+b
+#Also, there is a small explanation in the Lab0 document
+xC = np.mean(p[:,0])
+yC = np.mean(p[:,1])
+
+x,y = np.meshgrid(np.arange(RGB.shape[1]), np.arange(RGB.shape[0]))
+
+## This will update the value of p according to the selescted 4 points in figure 1
+p = np.vstack((p,p[0,:]))
+## This will be for each point selected, this wil run the formula inside the loop
+for i in range(4):
+    
+    ## The m is equal to the formula m= (y2-y1)/(x2-x1)
+    ## And b is equal to b = y1-m*x1
+    m = (p[i+1,1] - p[i,1])/(p[i+1,0] - p[i,0])
+    b = p[i,1] - p[i,0]*m
+    if yC > xC*m + b:
+            RGB[y<x*m+b] = 0
+    else:
+            RGB[y>x*m+b] = 0
+            
+## Now this part of the code will show the same RGB image from figure 1, the only change is that
+## it will segment the enclosed area from the 4 clics from the rest of the image
+plot.figure(2)
+plot.clf()
+plot.imshow(RGB)
+
+plot.figure(4)
+plot.clf()
+color1 = ["r", "g", "b"]
+
+# R[y > m*x+b] = 0
+# G[y > m*x+b] = 0
+# B[y > m*x+b] = 0
+
+# imNew[,,] = R
+# imNew[,,] = G
+# imNew[,,] = B
+R = G = B = 0
+color2 = [R, G, B]
+
+for i in range(3):
+    ##This will divide figure 4 into 3 parts, the i will give the characterictics of each of the r, g, and b data.
+    plot.subplot(3,1,i+1)
+    piece = RGB[:,:,i];
+    h = piece[piece > 0];
+    color2[i] = np.mean(h)
+    ##Histogram that will be displayed in each subplot with it's specifications
+    plot.hist(h,np.arange(0,260,5),color=color1[i])
+    plot.axis([0, 255, 0, plot.axis()[3]])
+
+R , G, B = (color2[i] for i in range(3))
+
+## These are the ranges of the spectrum of each of the folder colors
+## Used this website for reference
+## https://www.rapidtables.com/web/color/RGB_Color.html
+## I did notice that there is a wide spectrum for the RGB, so I just went for the closest to the folder colors
+if   (G > 150) and (R < 125) and (B < 175):
+    print('The color of the folder is Green')
+elif (R > 225) and (G > 200) and (B < 175):
+    print('The color of the folder is Yellow')
+elif (R > 225) and (G > 100) and (B < 100):
+    print('The color of the folder is Orange')
+elif (B > 100) and (R < 100) and (G < 125):
+    print('The color of the folder is Blue')
+elif (B > 125) and (R < 150) and (G < 125):
+    print('The color of the folder is Purple')
+            
+# m =
+# b =
+# p = np.meshgrid(x,y)
+
+# plot.figure(2)
+# plot.clf()
+# plot.imshow(imNew)
